@@ -1,0 +1,8 @@
+comtypes==1.4.11
+distlib==0.3.8
+filelock==3.15.4
+platformdirs==4.2.2
+pypiwin32==223
+pyttsx3==2.99
+pywin32==310
+virtualenv==20.26.3
