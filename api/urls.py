@@ -1,0 +1,14 @@
+from django.urls import path
+from . import views
+
+app_name = 'api'
+
+urlpatterns = [
+    path('posts/', views.PostListAPIView.as_view(), name='post-list'),
+    path('services/', views.ServiceListAPIView.as_view(), name='service-list'),
+    path('projects/', views.ProjectListAPIView.as_view(), name='project-list'),
+    path('team/', views.TeamListAPIView.as_view(), name='team-list'),
+    path('clients/', views.ClientListAPIView.as_view(), name='client-list'),
+    path('about/', views.AboutAPIView.as_view(), name='about'),
+    path('contact/', views.ContactMessageCreateAPIView.as_view(), name='contact-create'),
+]
