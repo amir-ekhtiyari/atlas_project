@@ -5,6 +5,13 @@ from .models import *
 # Register your models here.
 
 
+# "inlines"
+
+class ImageInline(admin.TabularInline):
+    model = Image
+    extra = 1
+
+
 # admin.site.register(Post) I prefer to use decorator not this foramt !
 
 @admin.register(Post)
@@ -16,11 +23,11 @@ class PostAdmin(admin.ModelAdmin):
     date_hierarchy = 'publish'
     prepopulated_fields = {'slug': ['title']}
     list_editable = ['status']
+    inlines = [ImageInline]
 
 # additional customise
 # list_display_links = ['author']
 # raw_id_fields = ['author']
-
 
 
 @admin.register(Service)
@@ -62,3 +69,8 @@ class ContactMessageAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'subject', 'sent_at', 'is_read')
     list_filter = ('is_read', 'sent_at')
     search_fields = ('name', 'email', 'subject', 'message')
+
+
+@admin.register(Image)
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ['post', 'title', 'created']
