@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django_resized import ResizedImageField
+
 
 
 
@@ -163,7 +165,6 @@ class ContactMessage(models.Model):
 
 
 
-from django.db import models
 
 class Image(models.Model):
     post = models.ForeignKey(
@@ -184,7 +185,13 @@ class Image(models.Model):
         blank=True
     )
     created = models.DateTimeField(auto_now_add=True)
-    image_field = models.ImageField(upload_to="post_images/")
+    image_field = ResizedImageField(
+        size=[800, 600],  # resize to 800x600
+        upload_to="post_images/",
+        quality=75,  # optional: JPEG quality
+        crop=['middle', 'center'],  # optional: crop before resize
+        force_format='JPEG'  # optional: force to JPEG
+    )
 
     class Meta:
         ordering = ['created']

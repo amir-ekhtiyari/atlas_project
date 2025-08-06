@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from blog.models import Post, Service, Project, TeamMember, Client, About, ContactMessage
+from blog.models import *
+import re
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -39,7 +40,13 @@ class AboutSerializer(serializers.ModelSerializer):
 
 
 class ContactMessageSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(write_only=True, required=True)
+
     class Meta:
         model = ContactMessage
-        fields = '__all__'
+        fields = ['name', 'email', 'subject', 'message', 'attachment', 'phone']
 
+    def validate_phone(self, value):
+        if not re.match(r'^09\d{9}$', value):
+            raise serializers.ValidationError('شماره موبایل نامعتبر است.')
+        return value

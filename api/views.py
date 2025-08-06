@@ -2,7 +2,11 @@ from blog.models import *
 from .serializers import *
 from rest_framework import generics,  permissions
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import ContactMessageSerializer
+from rest_framework.permissions import AllowAny
 
 
 class PostListAPIView(generics.ListAPIView):
@@ -50,8 +54,13 @@ class AboutAPIView(generics.RetrieveAPIView):
         return self.queryset.first()  # فقط یک about داریم
 
 
-class ContactMessageCreateAPIView(generics.CreateAPIView):
-    queryset = ContactMessage.objects.all()
-    serializer_class = ContactMessageSerializer
-    permission_classes = [permissions.AllowAny]
+class ContactMessageAPIView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
 
+    def post(self, request, *args, **kwargs):
+        serializer = ContactMessageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'پیام با موفقیت ارسال شد.'}, status=201)
+        return Response(serializer.errors, status=400)
