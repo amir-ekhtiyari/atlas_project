@@ -13,6 +13,20 @@ class PostDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostDetail
         fields = '__all__'
+        extra_kwargs = {
+            'created': {'read_only': True},
+            'updated': {'read_only': True},
+        }
+
+    def validate_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError("قیمت نمی‌تواند منفی باشد.")
+        return value
+
+    def validate_stock(self, value):
+        if value < 0:
+            raise serializers.ValidationError("موجودی نمی‌تواند منفی باشد.")
+        return value
 
 
 class ServiceSerializer(serializers.ModelSerializer):

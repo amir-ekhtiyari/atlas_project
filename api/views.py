@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from blog.models import PostDetail
+from django.shortcuts import get_object_or_404
 
 
 class PostListAPIView(generics.ListAPIView):
@@ -14,10 +16,30 @@ class PostListAPIView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
 
-class PostDetailListAPIView(generics.ListAPIView):
-    queryset = PostDetail.objects.all()
+class PostDetailListCreateAPIView(generics.ListCreateAPIView):
+    queryset = PostDetail.objects.all().order_by('-created')
     serializer_class = PostDetailSerializer
     permission_classes = [permissions.AllowAny]
+
+
+class PostDetailRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = PostDetail.objects.all()
+    serializer_class = PostDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    # lookup_field = 'pk'  # پیش‌فرض DRF هست، لازم نیست بنویسی
+
+
+
+class PostDetailByPostSlugAPIView(generics.RetrieveAPIView):
+    serializer_class = PostDetailSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_object(self):
+        post_slug = self.kwargs['post_slug']
+        return get_object_or_404(PostDetail, post__slug=post_slug)
+
+
+
 
 
 class PostDetailAPIView(generics.RetrieveAPIView):
