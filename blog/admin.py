@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
-from .models import Post, Image, Service, Project, TeamMember, Client, About, ContactMessage
+from .models import Post, Image, Service, Project, TeamMember, Client, About, ContactMessage, PostDetail
 
 
 # ============================
@@ -44,6 +44,24 @@ class PostAdmin(admin.ModelAdmin):
     author = _('نویسنده')
     status = _('وضعیت')
     publish = _('تاریخ انتشار')
+
+
+# ============================
+# جزییات پست ها
+# ============================
+
+@admin.register(PostDetail)
+class PostDetailAdmin(admin.ModelAdmin):
+    list_display = ('post', 'sku', 'price', 'stock', 'condition', 'is_available', 'image_count')
+    list_filter = ('condition', 'is_available', 'created')
+    search_fields = ('post__title', 'sku')
+    ordering = ('-created',)
+    inlines = [ImageInline]
+
+    def image_count(self, obj):
+        return obj.images.count()
+
+    image_count.short_description = _('تعداد تصویر')
 
 
 # ============================
@@ -138,20 +156,25 @@ class ContactMessageAdmin(admin.ModelAdmin):
 
     def short_message(self, obj):
         return (obj.message[:50] + '...') if len(obj.message) > 50 else obj.message
+
     short_message.short_description = _('خلاصه پیام')
 
     def full_name(self, obj):
         return obj.name
+
     full_name.short_description = _('نام و نام خانوادگی')
 
     def email(self, obj):
         return obj.email
+
     email.short_description = _('ایمیل')
 
     def subject(self, obj):
         return obj.subject
+
     subject.short_description = _('موضوع')
 
     def sent_at_formatted(self, obj):
         return obj.sent_at.strftime('%Y/%m/%d - %H:%M')
+
     sent_at_formatted.short_description = _('تاریخ ارسال')

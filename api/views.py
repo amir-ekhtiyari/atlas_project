@@ -1,17 +1,22 @@
 from blog.models import *
 from .serializers import *
-from rest_framework import generics,  permissions
+from rest_framework import generics, permissions
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import ContactMessageSerializer
 from rest_framework.permissions import AllowAny
 
 
 class PostListAPIView(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class PostDetailListAPIView(generics.ListAPIView):
+    queryset = PostDetail.objects.all()
+    serializer_class = PostDetailSerializer
     permission_classes = [permissions.AllowAny]
 
 

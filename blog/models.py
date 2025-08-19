@@ -4,12 +4,9 @@ from django.contrib.auth.models import User
 from django_resized import ResizedImageField
 
 
-
-
 # ============================
 # (posts)    پست ها
 # ============================
-
 
 
 # Managers
@@ -52,6 +49,58 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ============================
+# جزییات پست ها (postdetail)
+# ============================
+
+
+# Managers
+
+class AvailableManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_available=True)
+
+
+class PostDetail(models.Model):
+    class Condition(models.TextChoices):
+        NEW = 'NW', 'New'
+        USED = 'US', 'Used'
+        REFURBISHED = 'RF', 'Refurbished'
+
+    # Relations
+    post = models.OneToOneField("Post", on_delete=models.CASCADE, related_name="details")
+
+    # Data fields
+    title = models.CharField(max_length=250, verbose_name="عنوان", null=True, blank=True)
+
+    description = models.TextField(verbose_name="توضیحات", null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    stock = models.PositiveIntegerField(default=0)
+    sku = models.CharField(max_length=50, unique=True)  # Stock Keeping Unit
+    condition = models.CharField(max_length=2, choices=Condition.choices, default=Condition.NEW)
+    is_available = models.BooleanField(default=True)
+
+    # Date
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    # Managers
+    objects = models.Manager()
+    available = AvailableManager()
+
+    class Meta:
+        ordering = ['-created']
+        indexes = [
+            models.Index(fields=['sku']),
+            models.Index(fields=['-created']),
+        ]
+        verbose_name = "Post Detail"
+        verbose_name_plural = "Post Details"
+
+    def __str__(self):
+        return f"{self.title} ({self.post.title}) - {self.sku}"
 
 
 
@@ -164,14 +213,20 @@ class ContactMessage(models.Model):
         return f"{self.name} - {self.subject}"
 
 
-
-
 class Image(models.Model):
     post = models.ForeignKey(
         'Post',
         on_delete=models.CASCADE,
         related_name="images",
         verbose_name="تصویر"
+    )
+    post_detail = models.ForeignKey(
+        'PostDetail',
+        on_delete=models.CASCADE,
+        related_name="images",
+        verbose_name="تصویر جزییات",
+        null=True,
+        blank=True
     )
     title = models.CharField(
         max_length=250,

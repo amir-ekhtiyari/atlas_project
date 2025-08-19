@@ -9,6 +9,12 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'status']
 
 
+class PostDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostDetail
+        fields = '__all__'
+
+
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
