@@ -45,6 +45,7 @@ class Post(models.Model):
         ordering = ['-publish']
         indexes = [
             models.Index(fields=['publish']),
+            models.Index(fields=['slug']),  # ایندکس روی slug اضافه شد
         ]
 
     def __str__(self):
