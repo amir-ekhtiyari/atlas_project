@@ -157,9 +157,23 @@ class Project(models.Model):
 
 
 # ============================
+# درباره ما
+# ============================
+class About(models.Model):
+    heading = models.CharField(max_length=200)
+    content = models.TextField()
+    image = models.ImageField(upload_to='about/', blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.heading
+
+
+# ============================
 # اعضای تیم
 # ============================
 class TeamMember(models.Model):
+    about = models.ForeignKey(About, on_delete=models.CASCADE, related_name='team_members', null=True, blank=True)
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=100)
     bio = models.TextField(blank=True)
@@ -176,6 +190,7 @@ class TeamMember(models.Model):
 # مشتریان / برندها
 # ============================
 class Client(models.Model):
+    about = models.ForeignKey(About, on_delete=models.CASCADE, related_name='clients', null=True, blank=True)
     name = models.CharField(max_length=100)
     logo = models.ImageField(upload_to='clients/', blank=True, null=True)
     website = models.URLField(blank=True)
@@ -184,19 +199,6 @@ class Client(models.Model):
 
     def __str__(self):
         return self.name
-
-
-# ============================
-# درباره ما
-# ============================
-class About(models.Model):
-    heading = models.CharField(max_length=200)
-    content = models.TextField()
-    image = models.ImageField(upload_to='about/', blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.heading
 
 
 # ============================
@@ -212,6 +214,22 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
+
+
+# ============================
+# اطلاعات برای about
+# ============================
+class ContactInfo(models.Model):
+    about = models.ForeignKey(About, on_delete=models.CASCADE, related_name='contact_infos')
+    phone = models.CharField(max_length=50, blank=True, null=True, verbose_name='شماره تماس')
+    address = models.CharField(max_length=255, blank=True, null=True, verbose_name='آدرس')
+    email = models.EmailField(blank=True, null=True, verbose_name='ایمیل')
+    instagram = models.URLField(blank=True, null=True, verbose_name='اینستاگرام')
+    telegram = models.URLField(blank=True, null=True, verbose_name='تلگرام')
+
+    def __str__(self):
+        return self.address or self.phone or "اطلاعات تماس"
+
 
 
 class Image(models.Model):

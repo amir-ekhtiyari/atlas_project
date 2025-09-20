@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
-from .models import Post, Image, Service, Project, TeamMember, Client, About, ContactMessage, PostDetail
+from .models import Post, Image, Service, Project, TeamMember, Client, About, ContactMessage, PostDetail, ContactInfo
 
 
 # ============================
@@ -22,6 +22,36 @@ class ImageInline(admin.TabularInline):
 
 
 # ============================
+# جزئیات پست به صورت Inline
+# ============================
+class PostDetailInline(admin.StackedInline):
+    model = PostDetail
+    can_delete = False
+    extra = 0
+    verbose_name_plural = 'جزئیات پست'
+    fk_name = 'post'
+
+
+# inline اعضای تیم
+class TeamMemberInline(admin.TabularInline):
+    model = TeamMember
+    extra = 1
+
+# inline مشتریان
+class ClientInline(admin.TabularInline):
+    model = Client
+    extra = 1
+
+# inline اطلاعات تماس
+class ContactInfoInline(admin.TabularInline):
+    model = ContactInfo
+    extra = 1
+
+
+# ============================
+# پست‌ها
+# ============================
+# ============================
 # پست‌ها
 # ============================
 @admin.register(Post)
@@ -32,14 +62,13 @@ class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     date_hierarchy = 'publish'
     ordering = ('-publish',)
-    inlines = [ImageInline]
+    inlines = [ImageInline, PostDetailInline]
 
     def image_count(self, obj):
         return obj.images.count()
-
     image_count.short_description = _('تعداد تصویر')
 
-    # فارسی سازی ستون‌ها
+    # فارسی سازی ستون‌ها (این‌ها سر جای خودشان می‌مانند)
     title = _('عنوان')
     author = _('نویسنده')
     status = _('وضعیت')
@@ -50,18 +79,18 @@ class PostAdmin(admin.ModelAdmin):
 # جزییات پست ها
 # ============================
 
-@admin.register(PostDetail)
-class PostDetailAdmin(admin.ModelAdmin):
-    list_display = ('post', 'sku', 'price', 'stock', 'condition', 'is_available', 'image_count')
-    list_filter = ('condition', 'is_available', 'created')
-    search_fields = ('post__title', 'sku')
-    ordering = ('-created',)
-    inlines = [ImageInline]
-
-    def image_count(self, obj):
-        return obj.images.count()
-
-    image_count.short_description = _('تعداد تصویر')
+# @admin.register(PostDetail)
+# class PostDetailAdmin(admin.ModelAdmin):
+#     list_display = ('post', 'sku', 'price', 'stock', 'condition', 'is_available', 'image_count')
+#     list_filter = ('condition', 'is_available', 'created')
+#     search_fields = ('post__title', 'sku')
+#     ordering = ('-created',)
+#     inlines = [ImageInline]
+#
+#     def image_count(self, obj):
+#         return obj.images.count()
+#
+#     image_count.short_description = _('تعداد تصویر')
 
 
 # ============================
@@ -138,9 +167,16 @@ class ClientAdmin(admin.ModelAdmin):
 # ============================
 @admin.register(About)
 class AboutAdmin(admin.ModelAdmin):
-    list_display = ('heading', 'updated_at')
+    list_display = ('heading', 'updated_at', 'preview_image')
     search_fields = ('heading', 'content')
     ordering = ('-updated_at',)
+    inlines = [TeamMemberInline, ClientInline, ContactInfoInline]  # همه یکجا
+
+    def preview_image(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="width:80px; height:auto; border-radius:4px;" />', obj.image.url)
+        return "-"
+    preview_image.short_description = 'تصویر'
 
 
 # ============================
