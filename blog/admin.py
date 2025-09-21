@@ -37,10 +37,12 @@ class TeamMemberInline(admin.TabularInline):
     model = TeamMember
     extra = 1
 
+
 # inline مشتریان
 class ClientInline(admin.TabularInline):
     model = Client
     extra = 1
+
 
 # inline اطلاعات تماس
 class ContactInfoInline(admin.TabularInline):
@@ -48,9 +50,6 @@ class ContactInfoInline(admin.TabularInline):
     extra = 1
 
 
-# ============================
-# پست‌ها
-# ============================
 # ============================
 # پست‌ها
 # ============================
@@ -66,6 +65,7 @@ class PostAdmin(admin.ModelAdmin):
 
     def image_count(self, obj):
         return obj.images.count()
+
     image_count.short_description = _('تعداد تصویر')
 
     # فارسی سازی ستون‌ها (این‌ها سر جای خودشان می‌مانند)
@@ -176,6 +176,7 @@ class AboutAdmin(admin.ModelAdmin):
         if obj.image:
             return format_html('<img src="{}" style="width:80px; height:auto; border-radius:4px;" />', obj.image.url)
         return "-"
+
     preview_image.short_description = 'تصویر'
 
 

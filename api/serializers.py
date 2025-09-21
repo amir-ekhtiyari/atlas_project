@@ -3,13 +3,52 @@ from blog.models import *
 import re
 
 
-class PostSerializer(serializers.ModelSerializer):
+# class PostSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Post
+#         fields = '--all--'
+#
+#
+# class PostDetailSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = PostDetail
+#         fields = '__all__'
+#         extra_kwargs = {
+#             'created': {'read_only': True},
+#             'updated': {'read_only': True},
+#         }
+#
+#     def validate_price(self, value):
+#         if value < 0:
+#             raise serializers.ValidationError("قیمت نمی‌تواند منفی باشد.")
+#         return value
+#
+#     def validate_stock(self, value):
+#         if value < 0:
+#             raise serializers.ValidationError("موجودی نمی‌تواند منفی باشد.")
+#         return value
+
+class ImageSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
     class Meta:
-        model = Post
-        fields = ['id', 'title', 'description', 'status', 'slug']
+        model = Image
+        fields = ['id', 'title', 'description', 'url']
+
+    def get_url(self, obj):
+        if not obj.image_field:
+            return None
+        request = self.context.get('request')
+        img_url = obj.image_field.url
+        if request:
+            return request.build_absolute_uri(img_url)
+        return img_url
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True, read_only=True)  # related_name="images" در مدل Image
+    post = serializers.PrimaryKeyRelatedField(read_only=True)  # یا اطلاعات کامل پست را بگذارید
+
     class Meta:
         model = PostDetail
         fields = '__all__'
@@ -29,6 +68,20 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return value
 
 
+class PostSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True, read_only=True)  # عکس‌های خود پست
+    details = PostDetailSerializer(read_only=True)  # چون related_name="details" در PostDetail دارید
+    author = serializers.CharField(source='author.username', read_only=True)
+
+    class Meta:
+        model = Post
+        fields = [
+            'id', 'title', 'slug', 'description',
+            'author', 'publish', 'created', 'updated',
+            'status', 'images', 'details'
+        ]
+
+
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
@@ -40,6 +93,11 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = '__all__'
 
+
+class AboutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = About
+        fields = '__all__'
 
 class TeamMemberSerializer(serializers.ModelSerializer):
     class Meta:
@@ -53,10 +111,7 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AboutSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = About
-        fields = '__all__'
+
 
 
 class ContactMessageSerializer(serializers.ModelSerializer):

@@ -104,7 +104,6 @@ class PostDetail(models.Model):
         return f"{self.title} ({self.post.title}) - {self.sku}"
 
 
-
 # ============================
 # خدمات (Services)
 # ============================
@@ -229,7 +228,6 @@ class ContactInfo(models.Model):
 
     def __str__(self):
         return self.address or self.phone or "اطلاعات تماس"
-
 
 
 class Image(models.Model):
