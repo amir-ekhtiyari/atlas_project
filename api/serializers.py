@@ -46,8 +46,8 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
-    images = ImageSerializer(many=True, read_only=True)  # related_name="images" در مدل Image
-    post = serializers.PrimaryKeyRelatedField(read_only=True)  # یا اطلاعات کامل پست را بگذارید
+    images = ImageSerializer(source='post.images', many=True, read_only=True)  # عکس‌های پست مادر
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = PostDetail
