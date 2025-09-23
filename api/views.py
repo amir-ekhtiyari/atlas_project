@@ -59,38 +59,54 @@ from django.shortcuts import get_object_or_404
 #     permission_classes = [permissions.AllowAny]
 
 class PostListAPIView(generics.ListAPIView):
-    queryset = Post.objects.all()  # یا Post.published.all()
+    """
+    لیست همه پست‌ها (بهینه‌شده با select_related و prefetch_related)
+    """
+    queryset = Post.objects.select_related('author').prefetch_related('images', 'details')
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class PostDetailAPIView(generics.RetrieveAPIView):
-    queryset = Post.objects.all()
+    """
+    جزئیات یک پست
+    """
+    queryset = Post.objects.select_related('author').prefetch_related('images', 'details')
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class PostDetailListCreateAPIView(generics.ListCreateAPIView):
-    queryset = PostDetail.objects.all().order_by('-created')
+    """
+    لیست یا ساخت PostDetail (بهینه‌شده با prefetch تصاویر پست مادر)
+    """
+    queryset = PostDetail.objects.select_related('post').prefetch_related('post__images').order_by('-created')
     serializer_class = PostDetailSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class PostDetailRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = PostDetail.objects.all()
+    """
+    مشاهده/ویرایش/حذف یک PostDetail
+    """
+    queryset = PostDetail.objects.select_related('post').prefetch_related('post__images')
     serializer_class = PostDetailSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class PostDetailByPostSlugAPIView(generics.RetrieveAPIView):
+    """
+    دریافت PostDetail براساس slug پست مادر
+    """
     serializer_class = PostDetailSerializer
     permission_classes = [permissions.AllowAny]
 
     def get_object(self):
-        from django.shortcuts import get_object_or_404
         post_slug = self.kwargs['post_slug']
-        return get_object_or_404(PostDetail, post__slug=post_slug)
-
+        return get_object_or_404(
+            PostDetail.objects.select_related('post').prefetch_related('post__images'),
+            post__slug=post_slug
+        )
 
 class ServiceListAPIView(generics.ListAPIView):
     queryset = Service.objects.active()

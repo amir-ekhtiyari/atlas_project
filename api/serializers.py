@@ -30,23 +30,46 @@ import re
 
 class ImageSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = Image
         fields = ['id', 'title', 'description', 'url']
 
     def get_url(self, obj):
-        if not obj.image_field:
+        """
+        اگر اسم فیلد فایل/عکس شما در مدل Image چیزی به جز `image_field` است،
+        اینجا آن اسم را جایگزین کنید (مثلاً `image` یا `file`).
+        اینجا کمی محافظ‌کارانه بررسی می‌کنیم چند نام ممکن را.
+        """
+        # سعی می‌کنیم نام‌های معمول را پشتیبانی کنیم؛ اگر مدل شما نام دیگری دارد، تغییر بده.
+        image_field = getattr(obj, 'image_field', None) or getattr(obj, 'image', None) or getattr(obj, 'file', None)
+        if not image_field:
             return None
+
+        try:
+            img_url = image_field.url
+        except Exception:
+            return None
+
         request = self.context.get('request')
-        img_url = obj.image_field.url
         if request:
             return request.build_absolute_uri(img_url)
         return img_url
 
+    def get_title(self, obj):
+        # عنوان را از پست مادر می‌گیریم
+        return getattr(obj.post, 'title', None)
+
+    def get_description(self, obj):
+        # توضیحات را از پست مادر می‌گیریم
+        return getattr(obj.post, 'description', None)
+
 
 class PostDetailSerializer(serializers.ModelSerializer):
-    images = ImageSerializer(source='post.images', many=True, read_only=True)  # عکس‌های پست مادر
+    # تصاویر پست مادر (Post) — source='post.images' چون PostDetail دارای FK به Post است
+    images = ImageSerializer(source='post.images', many=True, read_only=True)
     post = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
@@ -70,7 +93,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, read_only=True)  # عکس‌های خود پست
-    details = PostDetailSerializer(read_only=True)  # چون related_name="details" در PostDetail دارید
+    # چون هر پست فقط یک detail دارد (OneToOneField)، many=False می‌گذاریم:
+    details = PostDetailSerializer(read_only=True)
     author = serializers.CharField(source='author.username', read_only=True)
 
     class Meta:
@@ -80,7 +104,6 @@ class PostSerializer(serializers.ModelSerializer):
             'author', 'publish', 'created', 'updated',
             'status', 'images', 'details'
         ]
-
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
