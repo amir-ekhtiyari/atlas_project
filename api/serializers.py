@@ -116,11 +116,19 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = '__all__'
 
+class ContactInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactInfo
+        fields = ['phone', 'address', 'email', 'instagram', 'telegram']
+
 
 class AboutSerializer(serializers.ModelSerializer):
+    contact_infos = ContactInfoSerializer(many=True, read_only=True)
+
     class Meta:
         model = About
-        fields = '__all__'
+        fields = ['id', 'heading', 'content', 'image', 'updated_at', 'contact_infos']
+
 
 class TeamMemberSerializer(serializers.ModelSerializer):
     class Meta:
@@ -132,8 +140,6 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = '__all__'
-
-
 
 
 

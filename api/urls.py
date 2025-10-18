@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import ContactMessageAPIView
+from .views import *
 
 app_name = 'api'
 
@@ -19,5 +19,5 @@ urlpatterns = [
     path('team/', views.TeamListAPIView.as_view(), name='team-list'),
     path('clients/', views.ClientListAPIView.as_view(), name='client-list'),
     path('about/', views.AboutAPIView.as_view(), name='about'),
-    path('contact/', ContactMessageAPIView.as_view(), name='contact-message-api'),
+    path('ContactMessage/', ContactMessageAPIView.as_view(), name='contact-message-api'),
 ]
